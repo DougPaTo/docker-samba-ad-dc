@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y build-essential libacl1-dev libattr1-de
       python-dnspython gdb pkg-config libpopt-dev libldap2-dev \
       dnsutils libbsd-dev attr krb5-user docbook-xsl libcups2-dev acl python-xattr \
       samba smbclient krb5-kdc openssh-server supervisor expect pwgen rsyslog \
-      sssd sssd-tools libpam-sss libnss-sss libnss-ldap bind9 dnsutils winbind
+      sssd sssd-tools libpam-sss libnss-sss libnss-ldap bind9 dnsutils winbind ntp
 RUN mkdir -p /var/run/sshd
 RUN mkdir -p /var/log/supervisor
 RUN sed -ri 's/PermitRootLogin without-password/PermitRootLogin Yes/g' /etc/ssh/sshd_config
@@ -23,8 +23,6 @@ RUN sed -ri 's/PermitRootLogin without-password/PermitRootLogin Yes/g' /etc/ssh/
 COPY named.conf.options /etc/bind/named.conf.options
 
 # Install samba and dependencies to make it an Active Directory Domain Controller
-
-
 
 # Install utilities needed for setup
 COPY kdb5_util_create.expect kdb5_util_create.expect
@@ -48,5 +46,6 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY init.sh /init.sh
 RUN chmod 755 /init.sh
 EXPOSE 22 53 389 88 135 139 138 445 464 3268 3269
+EXPOSE 123/udp
 ENTRYPOINT ["/init.sh"]
 CMD ["app:start"]
