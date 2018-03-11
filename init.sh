@@ -4,6 +4,8 @@ set -e
 
 SAMBA_DOMAIN=${SAMBA_DOMAIN:-SAMDOM}
 SAMBA_REALM=${SAMBA_REALM:-SAMDOM.EXAMPLE.COM}
+HOSTNAME=${HOSTNAME:-"hostname -f"}
+
 LDAP_ALLOW_INSECURE=${LDAP_ALLOW_INSECURE:-false}
 
 if [[ $SAMBA_HOST_IP ]]; then
@@ -48,7 +50,11 @@ appSetup () {
         cp /etc/krb5.keytab $KRBKEYTAP_CONF_BACKUP
     fi
     sed -i "s/SAMBA_REALM/${SAMBA_REALM}/" /etc/sssd/sssd.conf
-    
+
+    # add dns-forwarder if required
+    [ -n "$SAMBA_DNS_FORWARDER" ] \
+        && sed -i "/\[global\]/a \\\dns forwarder = $SAMBA_DNS_FORWARDER" /etc/samba/smb.conf
+
     cp /etc/samba/smb.conf $SAMBA_CONF_BACKUP
     cp /etc/sssd/sssd.conf $SSSD_CONF_BACKUP
 }
